@@ -29,7 +29,9 @@ public class Server {
 	}
 
 	private static class Handler extends Thread {
+		private String info;
 		private String name;
+		private String password;
 		private Socket socket;
 		private BufferedReader in;
 		private PrintWriter out;
@@ -44,14 +46,19 @@ public class Server {
 						new InputStreamReader(socket.getInputStream()));
 				out = new PrintWriter(socket.getOutputStream(), true);
 				while(true) {
-					out.println("SUBMITNAME");
-					name = in.readLine();
+					out.println("SUBMITINFO");
+					info = in.readLine();
+					name = info.split(",")[0];
+					password = info.split(",")[1];
 					if (name == null) {
 						return;
 					}
 					if (!names.contains(name)) {
 						names.add(name);
 						break;
+					}
+					if (names.contains(name)) {
+						//ADD STUFFS HERE
 					}
 				}
 				out.println("NAMEACCEPTED");

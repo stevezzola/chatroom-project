@@ -37,9 +37,15 @@ public class Client {
 				"Welcome to the chatroom.", JOptionPane.PLAIN_MESSAGE);
 	}
 	
-	private String getName() {
-		return JOptionPane.showInputDialog(frame, "Your Screen Name?", 
-				"Please enter your screen name.", JOptionPane.PLAIN_MESSAGE);
+	private String getInfo() {
+		JTextField tfusername = new JTextField();
+		JTextField tfpassword = new JPasswordField();
+		Object[] message = {"Username:", tfusername, "Password:", tfpassword};
+		
+		JOptionPane.showConfirmDialog(frame, message, 
+				"Login", JOptionPane.OK_CANCEL_OPTION);
+		String info = tfusername.getText() + "," + tfpassword.getText();
+		return info;
 	}
 	
 	private void run() throws IOException {
@@ -51,8 +57,8 @@ public class Client {
 		
 		while(true) {
 			String line = in.readLine();
-			if (line.startsWith("SUBMITNAME")) {
-				out.println(getName());
+			if (line.startsWith("SUBMITINFO")) {
+				out.println(getInfo());
 			}
 			else if (line.startsWith("NAMEACCEPTED")) {
 				textField.setEditable(true);
