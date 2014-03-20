@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+
 import javax.swing.*;
 
 public class Client {
@@ -65,6 +66,22 @@ public class Client {
 			}
 			else if (line.startsWith("MESSAGE")) {
 				messageArea.append(line.substring(8) + "\n");
+			}
+			else if (line.startsWith("DUPLICATE")) {
+				JOptionPane.showMessageDialog(frame, "This user is already signed in.",
+	    				"Warning", JOptionPane.WARNING_MESSAGE);
+			}
+			else if (line.startsWith("INVALIDPASSWORD")) {
+				JOptionPane.showMessageDialog(frame, "Password is invalid.",
+	    				"Warning", JOptionPane.WARNING_MESSAGE);
+			}
+			else if (line.startsWith("NAMENOTFOUND")) {
+				JOptionPane.showMessageDialog(frame, "Username not found.",
+	    				"Warning", JOptionPane.WARNING_MESSAGE);
+			}
+			else if (line.startsWith("INCOMPLETE")) {
+				JOptionPane.showMessageDialog(frame, "Please fill all fields.",
+	    				"Warning", JOptionPane.WARNING_MESSAGE);
 			}
 		}
 	}

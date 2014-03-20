@@ -42,25 +42,43 @@ public class Server {
 		
 		public void run() {
 			try {
-				in = new BufferedReader(
-						new InputStreamReader(socket.getInputStream()));
+				in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 				out = new PrintWriter(socket.getOutputStream(), true);
 				while(true) {
 					out.println("SUBMITINFO");
 					info = in.readLine();
-					name = info.split(",")[0];
-					password = info.split(",")[1];
-					if (name == null) {
-						return;
+					System.out.println(info);
+					try {
+						name = info.split(",")[0];
+						password = info.split(",")[1];
 					}
-					if (!names.contains(name)) {
+					catch (ArrayIndexOutOfBoundsException e) {
+						out.println("INCOMPLETE");
+						continue;
+					}
+					if (name == null) {
+						continue;
+					}
+					else if (names.contains(name)) {
+						out.println("DUPLICATENAME");
+						continue;
+					}
+					User user = new User(name, password);
+					int trigger = user.getUser(name, password);
+					if (trigger == 1) {
 						names.add(name);
 						break;
 					}
-					if (names.contains(name)) {
-						//ADD STUFFS HERE
+					else if (trigger == -1) {
+						out.println("INVALIDPASSWORD");
+						continue;
+					}
+					else {
+						out.println("NAMENOTFOUND");
+						continue;
 					}
 				}
+				
 				out.println("NAMEACCEPTED");
 				writers.add(out);
 			
