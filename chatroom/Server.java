@@ -47,6 +47,9 @@ public class Server {
 				while(true) {
 					out.println("SUBMITINFO");
 					info = in.readLine();
+					if (info.equals("CLOSE")) {
+						throw (new Exception());
+					}
 					try {
 						name = info.split(",")[0];
 						password = info.split(",")[1];

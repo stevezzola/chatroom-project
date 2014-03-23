@@ -42,10 +42,15 @@ public class Client {
 		JTextField tfusername = new JTextField();
 		JTextField tfpassword = new JPasswordField();
 		Object[] message = {"Username:", tfusername, "Password:", tfpassword};
-		JOptionPane.showConfirmDialog(frame, message, 
+		int button = JOptionPane.showConfirmDialog(frame, message, 
 				"Login", JOptionPane.OK_CANCEL_OPTION);
-		String info = tfusername.getText() + "," + tfpassword.getText();
-		return info;
+		if (button == 0) {
+			String info = tfusername.getText() + "," + tfpassword.getText();
+			return info;
+		}
+		else {
+			return "CLOSE";
+			}
 	}
 	
 	private void run() throws IOException {
@@ -58,7 +63,11 @@ public class Client {
 		while(true) {
 			String line = in.readLine();
 			if (line.startsWith("SUBMITINFO")) {
-				out.println(getInfo());
+				String info = getInfo();
+				out.println(info);
+				if (info.equals("CLOSE")) {
+					System.exit(0);
+				}
 			}
 			else if (line.startsWith("NAMEACCEPTED")) {
 				textField.setEditable(true);
