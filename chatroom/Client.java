@@ -21,7 +21,7 @@ public class Client {
 	public Client() {
 		textField.setEditable(false);
 		messageArea.setEditable(false);
-		frame.getContentPane().add(textField, BorderLayout.NORTH);
+		frame.getContentPane().add(textField, BorderLayout.SOUTH);
 		frame.getContentPane().add(messageArea, BorderLayout.CENTER);
 		frame.pack();
 		
@@ -42,7 +42,6 @@ public class Client {
 		JTextField tfusername = new JTextField();
 		JTextField tfpassword = new JPasswordField();
 		Object[] message = {"Username:", tfusername, "Password:", tfpassword};
-		
 		JOptionPane.showConfirmDialog(frame, message, 
 				"Login", JOptionPane.OK_CANCEL_OPTION);
 		String info = tfusername.getText() + "," + tfpassword.getText();

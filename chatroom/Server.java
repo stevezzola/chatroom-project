@@ -47,7 +47,6 @@ public class Server {
 				while(true) {
 					out.println("SUBMITINFO");
 					info = in.readLine();
-					System.out.println(info);
 					try {
 						name = info.split(",")[0];
 						password = info.split(",")[1];
@@ -64,7 +63,7 @@ public class Server {
 						continue;
 					}
 					User user = new User(name, password);
-					int trigger = user.getUser(name, password);
+					int trigger = user.getUser(user);
 					if (trigger == 1) {
 						names.add(name);
 						break;

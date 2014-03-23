@@ -5,9 +5,10 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class User {
+public class User implements Serializable{
 	private String name;
 	private String password;
 	
@@ -16,26 +17,24 @@ public class User {
 		this.password = password;
 	}
 	
-	public int getUser(String name, String password) {
+	public int getUser(User user) {
 		ArrayList<User> users = loadUserArrayList();
 		if (users == null) {
 			users = new ArrayList<User>();
+			users.add(new User("admin", "12345"));
+			writeFile(users);
 		}
-		User foundUser = new User(name, password);
-		int index = searchUserIndex(name);
+		int index = searchUserIndex(user.getName());
 		if (index == -1) {
+			System.out.println(users.toString());
 			return 0; //user not found
 		}
-		else if (password != users.get(index).getPassword()) {
+		else if (!password.equals(users.get(index).getPassword())) {
 			return -1; //incorrect password
 		}
 		else {
-			
 			return 1; //user/pass accepted
 		}
-			
-		
-		
 	}
 	
 	public void addUser(String name, String password) {
@@ -83,7 +82,7 @@ public class User {
 		ArrayList<User> temp = loadUserArrayList();
 		if (temp == null) return -1;
 		for (int i = 0; i < temp.size(); i++) {
-			if (temp.get(i).getName().equals(name)) {
+			if (temp.get(i).getName().equalsIgnoreCase(name)) {
 				return i;
 			}
 		}
