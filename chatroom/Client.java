@@ -12,6 +12,7 @@ import javax.swing.*;
 import javax.swing.text.DefaultCaret;
 
 public class Client {
+	// Hey this project needs more work
 
 	private BufferedReader in;
 	private PrintWriter out;
