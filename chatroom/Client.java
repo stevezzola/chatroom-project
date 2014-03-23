@@ -9,6 +9,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 
 import javax.swing.*;
+import javax.swing.text.DefaultCaret;
 
 public class Client {
 
@@ -16,13 +17,33 @@ public class Client {
 	private PrintWriter out;
 	JFrame frame = new JFrame("Client Box");
 	JTextField textField = new JTextField(40);
-	JTextArea messageArea = new JTextArea(8, 40);
+	JTextArea textArea1 = new JTextArea(10, 40);
+	JTextArea textArea2 = new JTextArea(10, 40);
+	JScrollPane scrollPane1 = new JScrollPane(textArea1);
+	JScrollPane scrollPane2 = new JScrollPane(textArea2);
+	JTabbedPane tabbedPane = new JTabbedPane();
+	JPanel tab1 = new JPanel();
+	JPanel tab2 = new JPanel();
 	
 	public Client() {
 		textField.setEditable(false);
-		messageArea.setEditable(false);
+		textArea1.setEditable(false);
+		textArea2.setEditable(false);
+		textArea1.setLineWrap(true);
+		textArea2.setLineWrap(true);
+		DefaultCaret caret1 = (DefaultCaret)textArea1.getCaret();
+		caret1.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+		DefaultCaret caret2 = (DefaultCaret)textArea2.getCaret();
+		caret2.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);	
+		scrollPane1.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		scrollPane2.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		tab1.add(scrollPane1, BorderLayout.CENTER);
+		tab2.add(scrollPane2, BorderLayout.CENTER);
+		tabbedPane.addTab("Room 1", tab1);
+		tabbedPane.addTab("Room 2", tab2);
+		frame.getContentPane().add(tabbedPane);
 		frame.getContentPane().add(textField, BorderLayout.SOUTH);
-		frame.getContentPane().add(messageArea, BorderLayout.CENTER);
+		frame.setResizable(false);
 		frame.pack();
 		
 		textField.addActionListener(new ActionListener() {
@@ -34,8 +55,13 @@ public class Client {
 	}
 	
 	private String getServerAddress() {
-		return JOptionPane.showInputDialog(frame, "Server's IP?", 
+		String ip = JOptionPane.showInputDialog(frame, "Server's IP?", 
 				"Welcome to the chatroom.", JOptionPane.PLAIN_MESSAGE);
+		if (ip == null) {
+			return "IPEXIT";
+		}
+		else
+			return ip;
 	}
 	
 	private String register(String name) {
@@ -84,6 +110,9 @@ public class Client {
 	
 	private void run() throws IOException {
 		String serverAddress = getServerAddress();
+		if (serverAddress.equals("IPEXIT")) {
+			System.exit(0);
+		}
 		Socket socket = new Socket(serverAddress, 4000);
 		in = new BufferedReader(
 				new InputStreamReader(socket.getInputStream()));
@@ -114,7 +143,13 @@ public class Client {
 				textField.setEditable(true);
 			}
 			else if (line.startsWith("MESSAGE")) {
-				messageArea.append(line.substring(8) + "\n");
+				int currentTab = tabbedPane.getSelectedIndex();
+				if (currentTab == 0) {
+					textArea1.append(line.substring(8) + "\n");
+				}
+				else if (currentTab == 1) {
+					textArea2.append(line.substring(8) + "\n");
+				}
 			}
 			else if (line.startsWith("DUPLICATE")) {
 				JOptionPane.showMessageDialog(frame, "This user is already signed in.",
