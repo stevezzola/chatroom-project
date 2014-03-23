@@ -8,7 +8,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-public class User implements Serializable{
+public class User implements Serializable {
 	private String name;
 	private String password;
 	
@@ -17,8 +17,9 @@ public class User implements Serializable{
 		this.password = password;
 	}
 	
-	public int getUser(User user) {
+	public static int getUser(String name, String password) {
 		ArrayList<User> users = loadUserArrayList();
+		User user = new User(name, password);
 		if (users == null) {
 			users = new ArrayList<User>();
 			users.add(new User("admin", "12345"));
@@ -26,7 +27,7 @@ public class User implements Serializable{
 		}
 		int index = searchUserIndex(user.getName());
 		if (index == -1) {
-			System.out.println(users.toString());
+			//System.out.println(users.toString());
 			return 0; //user not found
 		}
 		else if (!password.equals(users.get(index).getPassword())) {
@@ -37,23 +38,25 @@ public class User implements Serializable{
 		}
 	}
 	
-	public void addUser(String name, String password) {
+	public static int addUser(String name, String password) {
 		ArrayList<User> users = loadUserArrayList();
 		if (users == null) {
 			users = new ArrayList<User>();
+			users.add(new User("admin", "12345"));
+			writeFile(users);
 		}
-		User newUser = new User(name, password);
 		int index = searchUserIndex(name);	
 		if (index != -1) {
-			//says user name already exists
+			return 0; //username already exists
 		}
 		else {
-			users.add(newUser);
+			users.add(new User(name, password));
+			writeFile(users);
+			return 1;
 		}
-		writeFile(users);
 	}
 	
-	public void writeFile(ArrayList<User> users) {
+	public static void writeFile(ArrayList<User> users) {
 		try {
 			FileOutputStream fos = new FileOutputStream(new File("users.dat"));
 			ObjectOutputStream oos = new ObjectOutputStream(fos);
@@ -65,7 +68,7 @@ public class User implements Serializable{
 		}
 	}
 	
-	public ArrayList<User> loadUserArrayList() {
+	public static ArrayList<User> loadUserArrayList() {
 		try {
 			FileInputStream fis = new FileInputStream(new File("users.dat"));
 			ObjectInputStream ois = new ObjectInputStream(fis);
@@ -78,7 +81,7 @@ public class User implements Serializable{
 		}
 	}
 	
-	public int searchUserIndex(String name) {
+	public static int searchUserIndex(String name) {
 		ArrayList<User> temp = loadUserArrayList();
 		if (temp == null) return -1;
 		for (int i = 0; i < temp.size(); i++) {

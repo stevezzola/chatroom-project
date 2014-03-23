@@ -38,19 +38,48 @@ public class Client {
 				"Welcome to the chatroom.", JOptionPane.PLAIN_MESSAGE);
 	}
 	
-	private String getInfo() {
+	private String register(String name) {
+		JTextField tfusername = new JTextField(name);
+		JTextField tfpassword = new JPasswordField();
+		JTextField tfconfirmpass = new JPasswordField();
+		Object[] message = {"Create Username:", tfusername, 
+				"Create Password:", tfpassword, "Confirm Password:", tfconfirmpass};
+		int button = JOptionPane.showConfirmDialog(frame, message, 
+				"Register", JOptionPane.OK_CANCEL_OPTION);
+		String infoReg = tfusername.getText() + "," + tfpassword.getText();
+		if (button == 0) {
+			if (!tfpassword.getText().equals(tfconfirmpass.getText())) {
+				JOptionPane.showMessageDialog(frame, "Passwords do not match.",
+	    				"Warning", JOptionPane.WARNING_MESSAGE);
+				return register(tfusername.getText());
+			}
+			else {
+				return infoReg;
+			}
+		}
+		else {
+			return "REGEXIT";
+		}
+	}
+	
+	private String login(String name) {
 		JTextField tfusername = new JTextField();
 		JTextField tfpassword = new JPasswordField();
 		Object[] message = {"Username:", tfusername, "Password:", tfpassword};
+		UIManager.put("OptionPane.yesButtonText", "Sign In");
+		UIManager.put("OptionPane.noButtonText", "Register");
 		int button = JOptionPane.showConfirmDialog(frame, message, 
-				"Login", JOptionPane.OK_CANCEL_OPTION);
+				"Login", JOptionPane.YES_NO_OPTION);
+		String info = tfusername.getText() + "," + tfpassword.getText();
 		if (button == 0) {
-			String info = tfusername.getText() + "," + tfpassword.getText();
 			return info;
 		}
+		else if (button == 1) {
+			return "REGISTER";
+		}
 		else {
-			return "CLOSE";
-			}
+			return "LOGINEXIT";
+		}
 	}
 	
 	private void run() throws IOException {
@@ -63,11 +92,23 @@ public class Client {
 		while(true) {
 			String line = in.readLine();
 			if (line.startsWith("SUBMITINFO")) {
-				String info = getInfo();
+				String info = login("");
 				out.println(info);
-				if (info.equals("CLOSE")) {
+				if (info.equals("LOGINEXIT")) {
 					System.exit(0);
 				}
+			}
+			else if (line.startsWith("REGISTERINFO")) {
+				String infoReg = register("");
+				out.println(infoReg);
+			}
+			else if (line.startsWith("USERNAMETAKEN")) {
+				JOptionPane.showMessageDialog(frame, "Username is taken!",
+	    				"Warning", JOptionPane.WARNING_MESSAGE);
+			}
+			else if (line.startsWith("REGCOMPLETE")) {
+				JOptionPane.showMessageDialog(frame, "You are now registered!",
+	    				"Congratulations!", JOptionPane.PLAIN_MESSAGE);
 			}
 			else if (line.startsWith("NAMEACCEPTED")) {
 				textField.setEditable(true);

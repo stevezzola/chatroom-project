@@ -47,9 +47,39 @@ public class Server {
 				while(true) {
 					out.println("SUBMITINFO");
 					info = in.readLine();
-					if (info.equals("CLOSE")) {
+					if (info.equals("LOGINEXIT")) {
 						throw (new Exception());
 					}
+					else if (info.equals("REGISTER")) {
+						while (true) {
+							out.println("REGISTERINFO");
+							info = in.readLine();
+							if (!info.equals("REGEXIT")) {
+								try {
+									name = info.split(",")[0];
+									password = info.split(",")[1];
+									int trigger = User.addUser(name, password);
+									if(trigger == 0) {
+										out.println("USERNAMETAKEN");
+										continue;
+									}
+									else {
+										out.println("REGCOMPLETE");
+										break;
+									}
+								}
+								catch (ArrayIndexOutOfBoundsException e) {
+									out.println("INCOMPLETE");
+									continue;
+								}
+							}
+						}
+						continue;
+					}
+					else if (info.equals("REGCANCEL")) {
+						continue;
+					}
+					
 					try {
 						name = info.split(",")[0];
 						password = info.split(",")[1];
@@ -65,8 +95,7 @@ public class Server {
 						out.println("DUPLICATENAME");
 						continue;
 					}
-					User user = new User(name, password);
-					int trigger = user.getUser(user);
+					int trigger = User.getUser(name, password);
 					if (trigger == 1) {
 						names.add(name);
 						break;
