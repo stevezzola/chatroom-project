@@ -5,6 +5,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.HashSet;
 
 public class Server {
@@ -114,12 +115,19 @@ public class Server {
 				writers.add(out);
 			
 				while(true) {
-					String input = in.readLine();
-					if (input == null) {
-						return;
+					try {
+						String tabInput = in.readLine();
+						char tab = tabInput.charAt(0);
+						String input = tabInput.substring(1); 
+						if (input == null) {
+							return;
+						}
+						for (PrintWriter writer: writers) {
+							writer.println(tab + "MESSAGE " + name + ": " + input);
+						}
 					}
-					for (PrintWriter writer: writers) {
-						writer.println("MESSAGE " + name + ": " + input);
+					catch (SocketException e) {
+						return;
 					}
 				}
 				
@@ -134,6 +142,7 @@ public class Server {
 				}
 				try {
 					socket.close();
+					System.out.println(name + " has disconnected.");
 				} catch (IOException e) {
 					System.err.println("Problem closing socket!");
 				}

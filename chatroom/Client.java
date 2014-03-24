@@ -12,7 +12,6 @@ import javax.swing.*;
 import javax.swing.text.DefaultCaret;
 
 public class Client {
-	// Hey this project needs more work
 
 	private BufferedReader in;
 	private PrintWriter out;
@@ -49,7 +48,8 @@ public class Client {
 		
 		textField.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				out.println(textField.getText());
+				String currentTab = Integer.toString(tabbedPane.getSelectedIndex());
+				out.println(currentTab + textField.getText());
 				textField.setText("");
 			}
 		});
@@ -143,14 +143,11 @@ public class Client {
 			else if (line.startsWith("NAMEACCEPTED")) {
 				textField.setEditable(true);
 			}
-			else if (line.startsWith("MESSAGE")) {
-				int currentTab = tabbedPane.getSelectedIndex();
-				if (currentTab == 0) {
-					textArea1.append(line.substring(8) + "\n");
-				}
-				else if (currentTab == 1) {
-					textArea2.append(line.substring(8) + "\n");
-				}
+			else if (line.startsWith("0MESSAGE")) {
+				textArea1.append(line.substring(9) + "\n");
+			}
+			else if (line.startsWith("1MESSAGE")) {
+				textArea2.append(line.substring(9) + "\n");
 			}
 			else if (line.startsWith("DUPLICATE")) {
 				JOptionPane.showMessageDialog(frame, "This user is already signed in.",
