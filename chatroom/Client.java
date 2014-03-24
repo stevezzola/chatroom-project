@@ -25,6 +25,8 @@ public class Client {
 	JTabbedPane tabbedPane = new JTabbedPane();
 	JPanel tab1 = new JPanel();
 	JPanel tab2 = new JPanel();
+	JPanel tabPlus = new JPanel();
+	JButton tabPlusButton = new JButton("+");
 	
 	public Client() {
 		textField.setEditable(false);
@@ -44,6 +46,11 @@ public class Client {
 		tab2.add(scrollPane2, BorderLayout.CENTER);
 		tabbedPane.addTab("Room 1", tab1);
 		tabbedPane.addTab("Room 2", tab2);
+		tabPlusButton.setContentAreaFilled(false);
+		tabPlusButton.setBorderPainted(false);
+		tabbedPane.add(tabPlus);
+		tabbedPane.setEnabledAt(2, false);
+		tabbedPane.setTabComponentAt(2, tabPlusButton);
 		frame.getContentPane().setBackground(Color.LIGHT_GRAY);
 		frame.getContentPane().add(tabbedPane);
 		frame.getContentPane().add(textField, BorderLayout.SOUTH);
@@ -55,6 +62,22 @@ public class Client {
 				String currentTab = Integer.toString(tabbedPane.getSelectedIndex());
 				out.println(currentTab + textField.getText());
 				textField.setText("");
+			}
+		});
+		
+		tabPlusButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String newTabName = JOptionPane.showInputDialog(frame, "          Name of new Private Chatroom?", 
+						"New Private Room.", JOptionPane.PLAIN_MESSAGE);
+				if (newTabName != null) {
+					tabbedPane.setSelectedComponent(tabPlus);
+					JPanel newTab = new JPanel();
+					JTextArea newTextArea = new JTextArea(10, 40);
+					newTab.add( new JScrollPane(newTextArea), BorderLayout.CENTER);
+					newTextArea.setEditable(false);
+					tabbedPane.insertTab(newTabName, null, newTab, "private room", tabbedPane.getSelectedIndex());
+					tabbedPane.setSelectedComponent(newTab);
+				}
 			}
 		});
 	}
@@ -160,11 +183,11 @@ public class Client {
 				else if (line.startsWith("NAMEACCEPTED")) {
 					textField.setEditable(true);
 				}
-				else if (line.startsWith("0MESSAGE")) {
-						textArea1.append(line.substring(9) + "\n");
+				else if (line.startsWith("MESSAGE0")) {
+					textArea1.append(line.substring(8) + "\n");
 				}
-				else if (line.startsWith("1MESSAGE")) {
-					textArea2.append(line.substring(9) + "\n");
+				else if (line.startsWith("MESSAGE1")) {
+					textArea2.append(line.substring(8) + "\n");
 				}
 				else if (line.startsWith("DUPLICATE")) {
 					JOptionPane.showMessageDialog(frame, "This user is already signed in.",

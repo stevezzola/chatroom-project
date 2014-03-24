@@ -133,7 +133,7 @@ public class Server {
 							return;
 						}
 						for (PrintWriter writer: writers) {
-							writer.println(tab + "MESSAGE " + name + ": " + input);
+							writer.println("MESSAGE" + tab + name + ": " + input);
 						}
 					}
 					catch (SocketException e) {
