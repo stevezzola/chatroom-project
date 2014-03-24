@@ -13,10 +13,10 @@ import javax.swing.*;
 import javax.swing.text.DefaultCaret;
 
 public class Client {
-
 	private BufferedReader in;
 	private PrintWriter out;
-	JFrame frame = new JFrame("Client Box");
+	private Socket socket = new Socket();
+	JFrame frame = new JFrame("Messenger");
 	JTextField textField = new JTextField(40);
 	JTextArea textArea1 = new JTextArea(10, 40);
 	JTextArea textArea2 = new JTextArea(10, 40);
@@ -32,6 +32,8 @@ public class Client {
 		textArea2.setEditable(false);
 		textArea1.setLineWrap(true);
 		textArea2.setLineWrap(true);
+		textArea1.setWrapStyleWord(true);
+		textArea2.setWrapStyleWord(true);
 		DefaultCaret caret1 = (DefaultCaret)textArea1.getCaret();
 		caret1.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
 		DefaultCaret caret2 = (DefaultCaret)textArea2.getCaret();
@@ -42,6 +44,7 @@ public class Client {
 		tab2.add(scrollPane2, BorderLayout.CENTER);
 		tabbedPane.addTab("Room 1", tab1);
 		tabbedPane.addTab("Room 2", tab2);
+		frame.getContentPane().setBackground(Color.LIGHT_GRAY);
 		frame.getContentPane().add(tabbedPane);
 		frame.getContentPane().add(textField, BorderLayout.SOUTH);
 		frame.setResizable(false);
@@ -122,7 +125,7 @@ public class Client {
 			System.exit(0);
 		}
 		try {
-			Socket socket = new Socket(serverAddress, 4000);
+			socket = new Socket(serverAddress, 4000);
 			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			out = new PrintWriter(socket.getOutputStream(), true);
 		}
@@ -133,50 +136,58 @@ public class Client {
 			return;
 		}
 		while(true) {
-			String line = in.readLine();
-			if (line.startsWith("SUBMITINFO")) {
-				String info = login("");
-				out.println(info);
-				if (info.equals("LOGINEXIT")) {
-					System.exit(0);
+			try {
+				String line = in.readLine();
+				if (line.startsWith("SUBMITINFO")) {
+					String info = login("");
+					out.println(info);
+					if (info.equals("LOGINEXIT")) {
+						throw (new Exception());
+					}
+				}
+				else if (line.startsWith("REGISTERINFO")) {
+					String infoReg = register("");
+					out.println(infoReg);
+				}
+				else if (line.startsWith("USERNAMETAKEN")) {
+					JOptionPane.showMessageDialog(frame, "      Username is taken!",
+							"Warning", JOptionPane.WARNING_MESSAGE);
+				}
+				else if (line.startsWith("REGCOMPLETE")) {
+					JOptionPane.showMessageDialog(frame, "  You are now registered!",
+							"Congratulations!", JOptionPane.INFORMATION_MESSAGE);
+				}
+				else if (line.startsWith("NAMEACCEPTED")) {
+					textField.setEditable(true);
+				}
+				else if (line.startsWith("0MESSAGE")) {
+						textArea1.append(line.substring(9) + "\n");
+				}
+				else if (line.startsWith("1MESSAGE")) {
+					textArea2.append(line.substring(9) + "\n");
+				}
+				else if (line.startsWith("DUPLICATE")) {
+					JOptionPane.showMessageDialog(frame, "This user is already signed in.",
+							"Warning", JOptionPane.WARNING_MESSAGE);
+				}
+				else if (line.startsWith("INVALIDPASSWORD")) {
+					JOptionPane.showMessageDialog(frame, "     Password is invalid.",
+							"Warning", JOptionPane.WARNING_MESSAGE);
+				}
+				else if (line.startsWith("NAMENOTFOUND")) {
+					JOptionPane.showMessageDialog(frame, "    Username not found.",
+							"Warning", JOptionPane.WARNING_MESSAGE);
+				}
+				else if (line.startsWith("INCOMPLETE")) {
+					JOptionPane.showMessageDialog(frame, "      Please fill all fields.",
+							"Warning", JOptionPane.WARNING_MESSAGE);
 				}
 			}
-			else if (line.startsWith("REGISTERINFO")) {
-				String infoReg = register("");
-				out.println(infoReg);
-			}
-			else if (line.startsWith("USERNAMETAKEN")) {
-				JOptionPane.showMessageDialog(frame, "      Username is taken!",
-	    				"Warning", JOptionPane.WARNING_MESSAGE);
-			}
-			else if (line.startsWith("REGCOMPLETE")) {
-				JOptionPane.showMessageDialog(frame, "  You are now registered!",
-	    				"Congratulations!", JOptionPane.INFORMATION_MESSAGE);
-			}
-			else if (line.startsWith("NAMEACCEPTED")) {
-				textField.setEditable(true);
-			}
-			else if (line.startsWith("0MESSAGE")) {
-				textArea1.append(line.substring(9) + "\n");
-			}
-			else if (line.startsWith("1MESSAGE")) {
-				textArea2.append(line.substring(9) + "\n");
-			}
-			else if (line.startsWith("DUPLICATE")) {
-				JOptionPane.showMessageDialog(frame, "This user is already signed in.",
-	    				"Warning", JOptionPane.WARNING_MESSAGE);
-			}
-			else if (line.startsWith("INVALIDPASSWORD")) {
-				JOptionPane.showMessageDialog(frame, "     Password is invalid.",
-	    				"Warning", JOptionPane.WARNING_MESSAGE);
-			}
-			else if (line.startsWith("NAMENOTFOUND")) {
-				JOptionPane.showMessageDialog(frame, "    Username not found.",
-	    				"Warning", JOptionPane.WARNING_MESSAGE);
-			}
-			else if (line.startsWith("INCOMPLETE")) {
-				JOptionPane.showMessageDialog(frame, "      Please fill all fields.",
-	    				"Warning", JOptionPane.WARNING_MESSAGE);
+			catch (Exception e) {
+				JOptionPane.showMessageDialog(frame, "Lost connection to the server!",
+						"Warning", JOptionPane.ERROR_MESSAGE);
+				socket.close();
+				System.exit(0);
 			}
 		}
 	}

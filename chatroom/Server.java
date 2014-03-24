@@ -1,4 +1,5 @@
 package chatroom;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -10,23 +11,32 @@ import java.util.HashSet;
 
 public class Server {
 	private static final int PORT = 4000;
+	private static ServerSocket listener;
 	private static HashSet<String> names = new HashSet<String>();
 	private static HashSet<PrintWriter> writers = new HashSet<PrintWriter>();
+	private static ServerGUI gui;
 	
-	public static void main(String[] args) throws Exception {
-		System.out.println("The chatroom is running...");
-		ServerSocket listener = new ServerSocket(PORT);
+	public static void main(String[] args) {
+		gui = new ServerGUI();
+		gui.start();
 		try {
-			while(true) {
-				new Handler(listener.accept()).start();
+			listener = new ServerSocket(PORT);
+			gui.textArea.append("The chatroom is running...\n");
+			try {
+				while(true) {
+					new Handler(listener.accept()).start();
+				}
+			} 
+			catch (Exception e) {
+				gui.textArea.append("Problem accepting socket!"); 
 			}
-		} 
-		catch (Exception e) {
-			System.err.println(e); 
+			finally {
+				listener.close();
+			}	
 		}
-		finally {
-			listener.close();
-		}	
+		catch (Exception e) {
+			gui.textArea.append("Server address is already in use!");
+		}
 	}
 
 	private static class Handler extends Thread {
@@ -49,6 +59,7 @@ public class Server {
 					out.println("SUBMITINFO");
 					info = in.readLine();
 					if (info.equals("LOGINEXIT")) {
+						name = null;
 						throw (new Exception());
 					}
 					else if (info.equals("REGISTER")) {
@@ -64,6 +75,7 @@ public class Server {
 								int trigger = User.addUser(name, password);
 								if(trigger == 0) {
 									out.println("USERNAMETAKEN");
+									name = null;
 									continue;
 								}
 								else {
@@ -96,6 +108,7 @@ public class Server {
 					int trigger = User.getUser(name, password);
 					if (trigger == 1) {
 						names.add(name);
+						gui.textArea.append(name + " has logged on.\n");
 						break;
 					}
 					else if (trigger == -1) {
@@ -129,11 +142,11 @@ public class Server {
 				}
 				
 			} catch (Exception e) {
-				System.out.println("Client closed: " + socket.getInetAddress());
+				gui.textArea.append("Client closed: " + socket.getInetAddress() + "\n");
 			} finally {
 				if(name != null) {
 					names.remove(name);
-					System.out.println(name + " has disconnected.");
+					gui.textArea.append(name + " has disconnected.\n");
 				}
 				if(out != null) {
 					writers.remove(out);	
@@ -141,7 +154,7 @@ public class Server {
 				try {
 					socket.close();
 				} catch (IOException e) {
-					System.err.println("Problem closing socket!");
+					gui.textArea.append("Problem closing socket!\n");
 				}
 			}
 		}
