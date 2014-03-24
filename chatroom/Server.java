@@ -55,23 +55,20 @@ public class Server {
 						while (true) {
 							out.println("REGISTERINFO");
 							info = in.readLine();
-							if (!info.equals("REGEXIT")) {
-								try {
-									name = info.split(",")[0];
-									password = info.split(",")[1];
-									int trigger = User.addUser(name, password);
-									if(trigger == 0) {
-										out.println("USERNAMETAKEN");
-										continue;
-									}
-									else {
-										out.println("REGCOMPLETE");
-										break;
-									}
-								}
-								catch (ArrayIndexOutOfBoundsException e) {
-									out.println("INCOMPLETE");
+							if (info.equals("REGEXIT")) {
+								break;
+							}
+							else {	
+								name = info.split(",")[0];
+								password = info.split(",")[1];
+								int trigger = User.addUser(name, password);
+								if(trigger == 0) {
+									out.println("USERNAMETAKEN");
 									continue;
+								}
+								else {
+									out.println("REGCOMPLETE");
+									break;
 								}
 							}
 						}
@@ -131,18 +128,18 @@ public class Server {
 					}
 				}
 				
-			} catch (Exception ex) {
-				System.err.println(ex);
+			} catch (Exception e) {
+				System.out.println("Client closed: " + socket.getInetAddress());
 			} finally {
 				if(name != null) {
 					names.remove(name);
+					System.out.println(name + " has disconnected.");
 				}
 				if(out != null) {
 					writers.remove(out);	
 				}
 				try {
 					socket.close();
-					System.out.println(name + " has disconnected.");
 				} catch (IOException e) {
 					System.err.println("Problem closing socket!");
 				}

@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.net.UnknownHostException;
 
 import javax.swing.*;
 import javax.swing.text.DefaultCaret;
@@ -75,8 +76,14 @@ public class Client {
 				"Register", JOptionPane.OK_CANCEL_OPTION);
 		String infoReg = tfusername.getText() + "," + tfpassword.getText();
 		if (button == 0) {
-			if (!tfpassword.getText().equals(tfconfirmpass.getText())) {
-				JOptionPane.showMessageDialog(frame, "Passwords do not match.",
+			if (tfusername.getText().equals("") || tfpassword.getText().equals("")
+					|| tfconfirmpass.getText().equals("")) {
+				JOptionPane.showMessageDialog(frame, " Please complete all fields.",
+	    				"Warning", JOptionPane.WARNING_MESSAGE);
+				return register(tfusername.getText());
+			}
+			else if (!tfpassword.getText().equals(tfconfirmpass.getText())) {
+				JOptionPane.showMessageDialog(frame, " Passwords do not match.",
 	    				"Warning", JOptionPane.WARNING_MESSAGE);
 				return register(tfusername.getText());
 			}
@@ -114,11 +121,17 @@ public class Client {
 		if (serverAddress.equals("IPEXIT")) {
 			System.exit(0);
 		}
-		Socket socket = new Socket(serverAddress, 4000);
-		in = new BufferedReader(
-				new InputStreamReader(socket.getInputStream()));
-		out = new PrintWriter(socket.getOutputStream(), true);
-		
+		try {
+			Socket socket = new Socket(serverAddress, 4000);
+			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			out = new PrintWriter(socket.getOutputStream(), true);
+		}
+		catch (UnknownHostException e) {
+			JOptionPane.showMessageDialog(frame, "Could not match IP address to a host.",
+    				"Unknown Host", JOptionPane.ERROR_MESSAGE);
+			run();
+			return;
+		}
 		while(true) {
 			String line = in.readLine();
 			if (line.startsWith("SUBMITINFO")) {
@@ -133,12 +146,12 @@ public class Client {
 				out.println(infoReg);
 			}
 			else if (line.startsWith("USERNAMETAKEN")) {
-				JOptionPane.showMessageDialog(frame, "Username is taken!",
+				JOptionPane.showMessageDialog(frame, "      Username is taken!",
 	    				"Warning", JOptionPane.WARNING_MESSAGE);
 			}
 			else if (line.startsWith("REGCOMPLETE")) {
-				JOptionPane.showMessageDialog(frame, "You are now registered!",
-	    				"Congratulations!", JOptionPane.PLAIN_MESSAGE);
+				JOptionPane.showMessageDialog(frame, "  You are now registered!",
+	    				"Congratulations!", JOptionPane.INFORMATION_MESSAGE);
 			}
 			else if (line.startsWith("NAMEACCEPTED")) {
 				textField.setEditable(true);
@@ -154,15 +167,15 @@ public class Client {
 	    				"Warning", JOptionPane.WARNING_MESSAGE);
 			}
 			else if (line.startsWith("INVALIDPASSWORD")) {
-				JOptionPane.showMessageDialog(frame, "Password is invalid.",
+				JOptionPane.showMessageDialog(frame, "     Password is invalid.",
 	    				"Warning", JOptionPane.WARNING_MESSAGE);
 			}
 			else if (line.startsWith("NAMENOTFOUND")) {
-				JOptionPane.showMessageDialog(frame, "Username not found.",
+				JOptionPane.showMessageDialog(frame, "    Username not found.",
 	    				"Warning", JOptionPane.WARNING_MESSAGE);
 			}
 			else if (line.startsWith("INCOMPLETE")) {
-				JOptionPane.showMessageDialog(frame, "Please fill all fields.",
+				JOptionPane.showMessageDialog(frame, "      Please fill all fields.",
 	    				"Warning", JOptionPane.WARNING_MESSAGE);
 			}
 		}
