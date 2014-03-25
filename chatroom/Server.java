@@ -128,13 +128,13 @@ public class Server {
 					try {
 						String tabInput = in.readLine();
 						if (tabInput.startsWith("PRIVATE")) {
-							gui.textArea.append("PRIVATE found! \n");
 							String nameInput = tabInput.substring(7);
-							gui.textArea.append("nameInput = " + nameInput + "\n");
 							String roomName = nameInput.split("%")[0];
-							gui.textArea.append("roomName = " + roomName + "\n");
-							String input = nameInput.split("%")[1];
-							gui.textArea.append("input = " + input + "\n");
+							String input = "";
+							try { 
+								input = nameInput.split("%")[1];
+							}
+							catch (ArrayIndexOutOfBoundsException e) {}
 							for (PrintWriter writer: writers) {
 								writer.println("PMESSAGE" + roomName + "%" + name + ": " + input);
 							}

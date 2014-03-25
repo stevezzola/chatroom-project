@@ -77,7 +77,7 @@ public class Client {
 			public void actionPerformed(ActionEvent e) {
 				int currentTab = tabbedPane.getSelectedIndex();
 				if (currentTab > 1) {
-					out.println("PRIVATE" + Chatroom.selected.name + "%" + textField.getText());
+					out.println("PRIVATE" + Chatroom.selected.name + "%" + textField.getText().replace("%", "/"));
 				}
 				else {
 				Integer.toString(currentTab);
@@ -98,8 +98,7 @@ public class Client {
 			public void actionPerformed(ActionEvent e) {
 				String newTabName = JOptionPane.showInputDialog(frame, "          Name of new Private Chatroom?", 
 						"New Private Room.", JOptionPane.PLAIN_MESSAGE);
-				if (newTabName != null) {
-					
+				if (newTabName != null && !newTabName.equals("")) {
 					Chatroom room = new Chatroom();
 					room.name = newTabName;
 					room.tab = new JPanel();
@@ -107,12 +106,15 @@ public class Client {
 					room.scrollPane = new JScrollPane(room.textArea);
 					room.tab.add(room.scrollPane, BorderLayout.CENTER);
 					room.textArea.setEditable(false);
+					room.textArea.setLineWrap(true);
+					room.textArea.setWrapStyleWord(true);
+					DefaultCaret caret = (DefaultCaret)room.textArea.getCaret();
+					caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+					room.scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 					Chatroom.chatrooms.add(room);
 					tabbedPane.setSelectedComponent(tabPlus);
 					tabbedPane.insertTab(room.name, null, room.tab, "private room", tabbedPane.getSelectedIndex());
 					tabbedPane.setSelectedComponent(room.tab);
-					
-					
 				}
 			}
 		});
@@ -277,7 +279,7 @@ public class Client {
 		public HashSet<String> names;
 	
 		public Chatroom(){
-			
+				
 		}
 		
 		private static void searchTab(JPanel tab) {
