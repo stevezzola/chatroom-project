@@ -229,7 +229,8 @@ public class Client {
 					String nameText = line.substring(8);
 					String roomName = nameText.split("%")[0];
 					String text = nameText.split("%")[1];
-					Chatroom.searchTab(roomName).textArea.append(text + "\n");
+					if (Chatroom.searchTab(roomName) != null)
+						Chatroom.searchTab(roomName).textArea.append(text + "\n");
 				}
 				else if (line.startsWith("DUPLICATE")) {
 					JOptionPane.showMessageDialog(frame, "This user is already signed in.",
@@ -292,7 +293,6 @@ public class Client {
 			for (int i = 0; i < chatrooms.size(); i++) {
 				if (name.equals(chatrooms.get(i).name)) {
 					return chatrooms.get(i);
-					
 				}
 			}
 			return null;
