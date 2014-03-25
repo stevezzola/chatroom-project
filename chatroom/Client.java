@@ -1,15 +1,31 @@
 package chatroom;
 
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.HashSet;
 
-import javax.swing.*;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.UIManager;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.text.DefaultCaret;
 
 public class Client {
@@ -59,9 +75,22 @@ public class Client {
 		
 		textField.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String currentTab = Integer.toString(tabbedPane.getSelectedIndex());
+				int currentTab = tabbedPane.getSelectedIndex();
+				if (currentTab > 1) {
+					out.println("PRIVATE" + Chatroom.selected.name + "%" + textField.getText());
+				}
+				else {
+				Integer.toString(currentTab);
 				out.println(currentTab + textField.getText());
+				}
 				textField.setText("");
+			}
+		});
+		
+		tabbedPane.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				JPanel temp = (JPanel)tabbedPane.getSelectedComponent();
+				Chatroom.searchTab(temp);
 			}
 		});
 		
@@ -70,13 +99,20 @@ public class Client {
 				String newTabName = JOptionPane.showInputDialog(frame, "          Name of new Private Chatroom?", 
 						"New Private Room.", JOptionPane.PLAIN_MESSAGE);
 				if (newTabName != null) {
+					
+					Chatroom room = new Chatroom();
+					room.name = newTabName;
+					room.tab = new JPanel();
+					room.textArea = new JTextArea(10, 40);
+					room.scrollPane = new JScrollPane(room.textArea);
+					room.tab.add(room.scrollPane, BorderLayout.CENTER);
+					room.textArea.setEditable(false);
+					Chatroom.chatrooms.add(room);
 					tabbedPane.setSelectedComponent(tabPlus);
-					JPanel newTab = new JPanel();
-					JTextArea newTextArea = new JTextArea(10, 40);
-					newTab.add( new JScrollPane(newTextArea), BorderLayout.CENTER);
-					newTextArea.setEditable(false);
-					tabbedPane.insertTab(newTabName, null, newTab, "private room", tabbedPane.getSelectedIndex());
-					tabbedPane.setSelectedComponent(newTab);
+					tabbedPane.insertTab(room.name, null, room.tab, "private room", tabbedPane.getSelectedIndex());
+					tabbedPane.setSelectedComponent(room.tab);
+					
+					
 				}
 			}
 		});
@@ -189,6 +225,12 @@ public class Client {
 				else if (line.startsWith("MESSAGE1")) {
 					textArea2.append(line.substring(8) + "\n");
 				}
+				else if (line.startsWith("PMESSAGE")) {
+					String nameText = line.substring(8);
+					String roomName = nameText.split("%")[0];
+					String text = nameText.split("%")[1];
+					Chatroom.searchTab(roomName).textArea.append(text + "\n");
+				}
 				else if (line.startsWith("DUPLICATE")) {
 					JOptionPane.showMessageDialog(frame, "This user is already signed in.",
 							"Warning", JOptionPane.WARNING_MESSAGE);
@@ -207,6 +249,7 @@ public class Client {
 				}
 			}
 			catch (Exception e) {
+				e.printStackTrace();
 				JOptionPane.showMessageDialog(frame, "Lost connection to the server!",
 						"Warning", JOptionPane.ERROR_MESSAGE);
 				socket.close();
@@ -221,5 +264,38 @@ public class Client {
 		client.frame.setLocationRelativeTo(null);
 		client.frame.setVisible(true);
 		client.run();
+	}
+	
+	public static class Chatroom {
+		private static ArrayList<Chatroom> chatrooms = new ArrayList<Chatroom>();
+		private static Chatroom selected;
+		public JPanel tab;
+		public JTextArea textArea;
+		public JScrollPane scrollPane;
+		public String name;
+		public HashSet<String> names;
+	
+		public Chatroom(){
+			
+		}
+		
+		private static void searchTab(JPanel tab) {
+			for (int i = 0; i < chatrooms.size(); i++) {
+				if (tab == chatrooms.get(i).tab) {
+					selected = chatrooms.get(i);
+					return;
+				}
+			}
+		}
+		
+		private static Chatroom searchTab(String name) {
+			for (int i = 0; i < chatrooms.size(); i++) {
+				if (name.equals(chatrooms.get(i).name)) {
+					return chatrooms.get(i);
+					
+				}
+			}
+			return null;
+		}
 	}
 }

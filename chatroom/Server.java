@@ -127,13 +127,24 @@ public class Server {
 				while(true) {
 					try {
 						String tabInput = in.readLine();
-						char tab = tabInput.charAt(0);
-						String input = tabInput.substring(1); 
-						if (input == null) {
-							return;
+						if (tabInput.startsWith("PRIVATE")) {
+							gui.textArea.append("PRIVATE found! \n");
+							String nameInput = tabInput.substring(7);
+							gui.textArea.append("nameInput = " + nameInput + "\n");
+							String roomName = nameInput.split("%")[0];
+							gui.textArea.append("roomName = " + roomName + "\n");
+							String input = nameInput.split("%")[1];
+							gui.textArea.append("input = " + input + "\n");
+							for (PrintWriter writer: writers) {
+								writer.println("PMESSAGE" + roomName + "%" + name + ": " + input);
+							}
 						}
-						for (PrintWriter writer: writers) {
-							writer.println("MESSAGE" + tab + name + ": " + input);
+						else {
+							char tab = tabInput.charAt(0);
+							String input = tabInput.substring(1); 
+							for (PrintWriter writer: writers) {
+								writer.println("MESSAGE" + tab + name + ": " + input);
+							}
 						}
 					}
 					catch (SocketException e) {
