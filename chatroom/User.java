@@ -8,6 +8,12 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+/**
+ * User Class for managing user info
+ * @author Steven Mazzola
+ *
+ */
+
 public class User implements Serializable {
 	private static final long serialVersionUID = 1L;
 	private String name;
@@ -18,6 +24,9 @@ public class User implements Serializable {
 		this.password = password;
 	}
 	
+	/*
+	 * gets user info from file
+	 */
 	public static int getUser(String name, String password) {
 		ArrayList<User> users = loadUserArrayList();
 		User user = new User(name, password);
@@ -27,18 +36,21 @@ public class User implements Serializable {
 			writeFile(users);
 		}
 		int index = searchUserIndex(user.getName());
+		//System.out.println(users.toString());
 		if (index == -1) {
-			//System.out.println(users.toString());
 			return 0; //user not found
 		}
 		else if (!password.equals(users.get(index).getPassword())) {
 			return -1; //incorrect password
 		}
 		else {
-			return 1; //user/pass accepted
+			return 1; //name and password accepted
 		}
 	}
 	
+	/*
+	 * adds user info to file
+	 */
 	public static int addUser(String name, String password) {
 		ArrayList<User> users = loadUserArrayList();
 		if (users == null) {
@@ -48,15 +60,18 @@ public class User implements Serializable {
 		}
 		int index = searchUserIndex(name);	
 		if (index != -1) {
-			return 0; //username already exists
+			return 0; //name already exists
 		}
 		else {
 			users.add(new User(name, password));
 			writeFile(users);
-			return 1;
+			return 1; //name registered
 		}
 	}
 	
+	/*
+	 * writes users to file
+	 */
 	public static void writeFile(ArrayList<User> users) {
 		try {
 			FileOutputStream fos = new FileOutputStream(new File("users.dat"));
@@ -69,6 +84,9 @@ public class User implements Serializable {
 		}
 	}
 	
+	/*
+	 * loads binary file of user info
+	 */
 	@SuppressWarnings("unchecked")
 	public static ArrayList<User> loadUserArrayList() {
 		try {
@@ -83,6 +101,9 @@ public class User implements Serializable {
 		}
 	}
 	
+	/*
+	 * searches file for specified user
+	 */
 	public static int searchUserIndex(String name) {
 		ArrayList<User> temp = loadUserArrayList();
 		if (temp == null) return -1;

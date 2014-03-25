@@ -10,6 +10,11 @@ import java.net.SocketException;
 import java.util.HashMap;
 import java.util.HashSet;
 
+/**
+ * Server side of Instant Messenger Project
+ * @author Steven Mazzola
+ *
+ */
 public class Server {
 	private static final int PORT = 4000;
 	private static ServerSocket listener;
@@ -18,6 +23,9 @@ public class Server {
 	private static HashMap<String, PrintWriter> hashMap = new HashMap<String, PrintWriter>();
 	private static ServerGUI gui;
 	
+	/*
+	 * Main method, runs GUI and listens for Client sockets
+	 */
 	public static void main(String[] args) {
 		gui = new ServerGUI();
 		gui.start();
@@ -40,7 +48,10 @@ public class Server {
 			gui.textArea.append("Server address is already in use!");
 		}
 	}
-
+	
+	/**
+	 * Handles each Client socket that has connected
+	 */
 	private static class Handler extends Thread {
 		private String info;
 		private String name;
@@ -53,11 +64,17 @@ public class Server {
 			this.socket = socket;
 		}
 		
+		/*
+		 * running the Server thread 
+		 */
 		public void run() {
 			try {
 				in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 				out = new PrintWriter(socket.getOutputStream(), true);
 				while(true) {
+					/*
+					 * giving commands to the Client
+					 */
 					out.println("SUBMITINFO");
 					info = in.readLine();
 					if (info.equals("LOGINEXIT")) {
@@ -128,6 +145,9 @@ public class Server {
 				hashMap.put(name, out);
 			
 				while(true) {
+					/*
+					 * reads User input after login 
+					 */
 					try {
 						String tabInput = in.readLine();
 						if (tabInput.startsWith("PRIVATE")) {
@@ -155,6 +175,7 @@ public class Server {
 							}
 							else {
 								hashMap.get(inviteName).println("PINVITE" + roomName + "%" + name);
+								gui.textArea.append(inviteName + " has joined " + name + "'s room: " + roomName + "\n");
 							}
 						}
 						

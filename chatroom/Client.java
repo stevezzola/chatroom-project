@@ -28,6 +28,11 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.text.DefaultCaret;
 
+/**
+ * Client side of Instant Messenger Project
+ * @author Steven Mazzola
+ *
+ */
 public class Client {
 	private BufferedReader in;
 	private PrintWriter out;
@@ -43,8 +48,12 @@ public class Client {
 	JPanel tab2 = new JPanel();
 	JPanel tabPlus = new JPanel();
 	JButton tabPlusButton = new JButton("+");
+	JButton inviteButton = new JButton("Invite User");
 	
 	public Client() {
+		/**
+		 * Creating Client GUI 
+		 */
 		textField.setEditable(false);
 		textArea1.setEditable(false);
 		textArea2.setEditable(false);
@@ -67,26 +76,22 @@ public class Client {
 		tabbedPane.add(tabPlus);
 		tabbedPane.setEnabledAt(2, false);
 		tabbedPane.setTabComponentAt(2, tabPlusButton);
+		inviteButton.setEnabled(false);
 		frame.getContentPane().setBackground(Color.LIGHT_GRAY);
 		frame.getContentPane().add(tabbedPane);
+		frame.getContentPane().add(inviteButton, BorderLayout.NORTH);
 		frame.getContentPane().add(textField, BorderLayout.SOUTH);
 		frame.setResizable(false);
 		frame.pack();
 		
+		/*
+		 * Action when user enters message
+		 */
 		textField.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				int currentTab = tabbedPane.getSelectedIndex();
 				if (currentTab > 1) {
-					if (!textField.getText().equals("SteveCode_InviteUser")) {
-						out.println("PRIVATE" + Chatroom.selected.name + "%" + textField.getText().replace("%", "/"));
-					}
-					else {
-						String inviteName = JOptionPane.showInputDialog(frame, "                   Enter name to invite:", 
-								"Add User", JOptionPane.PLAIN_MESSAGE);
-						if (inviteName != null) {
-							out.println("INVITE" + Chatroom.selected.name + "%" + inviteName.replace("%", "/"));
-						}
-					}
+					out.println("PRIVATE" + Chatroom.selected.name + "%" + textField.getText().replace("%", "/"));
 				}
 				else {
 				Integer.toString(currentTab);
@@ -96,13 +101,25 @@ public class Client {
 			}
 		});
 		
+		/*
+		 *  Action when user changes tabs
+		 */
 		tabbedPane.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				JPanel temp = (JPanel)tabbedPane.getSelectedComponent();
 				Chatroom.searchTab(temp);
+				if (tabbedPane.getSelectedIndex() > 1) {
+					inviteButton.setEnabled(true);
+				}
+				else {
+					inviteButton.setEnabled(false);
+				}
 			}
 		});
 		
+		/*
+		 *  Action when user clicks "Add Tab" button
+		 */
 		tabPlusButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String newTabName = JOptionPane.showInputDialog(frame, "          Name of new Private Chatroom?", 
@@ -118,8 +135,24 @@ public class Client {
 				}
 			}
 		});
+		
+		/*
+		 *  Action when user clicks invite button
+		 */
+		inviteButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String inviteName = JOptionPane.showInputDialog(frame, "                   Enter name to invite:", 
+						"Add User", JOptionPane.PLAIN_MESSAGE);
+				if (inviteName != null) {
+					out.println("INVITE" + Chatroom.selected.name + "%" + inviteName.replace("%", "/"));
+				}
+			}
+		});
 	}
 	
+	/*
+	 *  Asks user to enter IP address
+	 */
 	private String getServerAddress() {
 		String ip = JOptionPane.showInputDialog(frame, "Server's IP?", 
 				"Welcome to the chatroom.", JOptionPane.PLAIN_MESSAGE);
@@ -130,6 +163,9 @@ public class Client {
 			return ip;
 	}
 	
+	/*
+	 *  Getting info from a new user
+	 */
 	private String register(String name) {
 		JTextField tfusername = new JTextField(name);
 		JTextField tfpassword = new JPasswordField();
@@ -160,6 +196,9 @@ public class Client {
 		}
 	}
 	
+	/*
+	 *  Getting info from a previous user
+	 */
 	private String login(String name) {
 		JTextField tfusername = new JTextField();
 		JTextField tfpassword = new JPasswordField();
@@ -180,6 +219,9 @@ public class Client {
 		}
 	}
 	
+	/*
+	 *  running the Client thread
+	 */
 	private void run() throws IOException {
 		String serverAddress = getServerAddress();
 		if (serverAddress.equals("IPEXIT")) {
@@ -197,6 +239,9 @@ public class Client {
 			return;
 		}
 		while(true) {
+			/*
+			 * taking commands from the Server
+			 */
 			try {
 				String line = in.readLine();
 				if (line.startsWith("SUBMITINFO")) {
@@ -238,7 +283,7 @@ public class Client {
 					String roomHost = line.substring(7);
 					String roomName = roomHost.split("%")[0];
 					String host = roomHost.split("%")[1];
-					JOptionPane.showMessageDialog(frame, "               " + host + " invited you to " + roomName + ".",
+					JOptionPane.showMessageDialog(frame, "            " + host + " invited you to " + roomName + ".",
 							"Invite", JOptionPane.PLAIN_MESSAGE);
 					if (Chatroom.searchTab(roomName) == null) {
 						Chatroom room = new Chatroom();
@@ -248,9 +293,6 @@ public class Client {
 						tabbedPane.insertTab(room.name, null, room.tab, "private room", tabbedPane.getSelectedIndex());
 						tabbedPane.setSelectedComponent(room.tab);
 					}
-						
-					
-					
 				}
 				else if (line.startsWith("DUPLICATE")) {
 					JOptionPane.showMessageDialog(frame, "This user is already signed in.",
@@ -287,13 +329,15 @@ public class Client {
 		client.run();
 	}
 	
+	/**
+	 *  Keeps track of all rooms on a single Client
+	 */
 	public static class Chatroom {
 		private static ArrayList<Chatroom> chatrooms = new ArrayList<Chatroom>();
 		private static Chatroom selected;
 		public JPanel tab;
 		public JTextArea textArea;
 		public JScrollPane scrollPane;
-		//public JButton jButton;
 		public String name;
 		public HashSet<String> names;
 	
@@ -301,12 +345,14 @@ public class Client {
 				
 		}
 		
+		/*
+		 *  builds GUI for a new room
+		 */
 		public void	createRoom(String name) {
 			this.name = name;
 			tab = new JPanel();
 			textArea = new JTextArea(10, 40);
 			scrollPane = new JScrollPane(textArea);
-			//room.jButton = new JButton("Invite User");
 			tab.add(scrollPane, BorderLayout.CENTER);
 			textArea.setEditable(false);
 			textArea.setLineWrap(true);
@@ -316,6 +362,9 @@ public class Client {
 			scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		}
 		
+		/*
+		 * finds which tab is selected
+		 */
 		private static void searchTab(JPanel tab) {
 			for (int i = 0; i < chatrooms.size(); i++) {
 				if (tab == chatrooms.get(i).tab) {
@@ -325,6 +374,9 @@ public class Client {
 			}
 		}
 		
+		/*
+		 *  if exists, returns room with requested name;
+		 */
 		private static Chatroom searchTab(String name) {
 			for (int i = 0; i < chatrooms.size(); i++) {
 				if (name.equals(chatrooms.get(i).name)) {
