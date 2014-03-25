@@ -7,6 +7,7 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.HashMap;
 import java.util.HashSet;
 
 public class Server {
@@ -14,6 +15,7 @@ public class Server {
 	private static ServerSocket listener;
 	private static HashSet<String> names = new HashSet<String>();
 	private static HashSet<PrintWriter> writers = new HashSet<PrintWriter>();
+	private static HashMap<String, PrintWriter> hashMap = new HashMap<String, PrintWriter>();
 	private static ServerGUI gui;
 	
 	public static void main(String[] args) {
@@ -123,6 +125,7 @@ public class Server {
 				
 				out.println("NAMEACCEPTED");
 				writers.add(out);
+				hashMap.put(name, out);
 			
 				while(true) {
 					try {
@@ -139,6 +142,22 @@ public class Server {
 								writer.println("PMESSAGE" + roomName + "%" + name + ": " + input);
 							}
 						}
+						else if (tabInput.startsWith("INVITE")) {
+							String nameInput = tabInput.substring(6);
+							String roomName = nameInput.split("%")[0];
+							String inviteName = "";
+							try { 
+								inviteName = nameInput.split("%")[1];
+							}
+							catch (ArrayIndexOutOfBoundsException e) {}
+							if (hashMap.get(inviteName) == null) {
+								out.println("NAMENOTFOUND");
+							}
+							else {
+								hashMap.get(inviteName).println("PINVITE" + roomName + "%" + name);
+							}
+						}
+						
 						else {
 							char tab = tabInput.charAt(0);
 							String input = tabInput.substring(1); 

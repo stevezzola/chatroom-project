@@ -77,7 +77,16 @@ public class Client {
 			public void actionPerformed(ActionEvent e) {
 				int currentTab = tabbedPane.getSelectedIndex();
 				if (currentTab > 1) {
-					out.println("PRIVATE" + Chatroom.selected.name + "%" + textField.getText().replace("%", "/"));
+					if (!textField.getText().equals("SteveCode_InviteUser")) {
+						out.println("PRIVATE" + Chatroom.selected.name + "%" + textField.getText().replace("%", "/"));
+					}
+					else {
+						String inviteName = JOptionPane.showInputDialog(frame, "                   Enter name to invite:", 
+								"Add User", JOptionPane.PLAIN_MESSAGE);
+						if (inviteName != null) {
+							out.println("INVITE" + Chatroom.selected.name + "%" + inviteName.replace("%", "/"));
+						}
+					}
 				}
 				else {
 				Integer.toString(currentTab);
@@ -98,19 +107,10 @@ public class Client {
 			public void actionPerformed(ActionEvent e) {
 				String newTabName = JOptionPane.showInputDialog(frame, "          Name of new Private Chatroom?", 
 						"New Private Room.", JOptionPane.PLAIN_MESSAGE);
-				if (newTabName != null && !newTabName.equals("")) {
+				if (newTabName != null && !newTabName.equals("") && Chatroom.searchTab(newTabName) == null
+						&& !newTabName.equals("Room 1") && !newTabName.equals("Room 2")) {
 					Chatroom room = new Chatroom();
-					room.name = newTabName;
-					room.tab = new JPanel();
-					room.textArea = new JTextArea(10, 40);
-					room.scrollPane = new JScrollPane(room.textArea);
-					room.tab.add(room.scrollPane, BorderLayout.CENTER);
-					room.textArea.setEditable(false);
-					room.textArea.setLineWrap(true);
-					room.textArea.setWrapStyleWord(true);
-					DefaultCaret caret = (DefaultCaret)room.textArea.getCaret();
-					caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
-					room.scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+					room.createRoom(newTabName);
 					Chatroom.chatrooms.add(room);
 					tabbedPane.setSelectedComponent(tabPlus);
 					tabbedPane.insertTab(room.name, null, room.tab, "private room", tabbedPane.getSelectedIndex());
@@ -234,6 +234,24 @@ public class Client {
 					if (Chatroom.searchTab(roomName) != null)
 						Chatroom.searchTab(roomName).textArea.append(text + "\n");
 				}
+				else if (line.startsWith("PINVITE")) {
+					String roomHost = line.substring(7);
+					String roomName = roomHost.split("%")[0];
+					String host = roomHost.split("%")[1];
+					JOptionPane.showMessageDialog(frame, "               " + host + " invited you to " + roomName + ".",
+							"Invite", JOptionPane.PLAIN_MESSAGE);
+					if (Chatroom.searchTab(roomName) == null) {
+						Chatroom room = new Chatroom();
+						room.createRoom(roomName);
+						Chatroom.chatrooms.add(room);
+						tabbedPane.setSelectedComponent(tabPlus);
+						tabbedPane.insertTab(room.name, null, room.tab, "private room", tabbedPane.getSelectedIndex());
+						tabbedPane.setSelectedComponent(room.tab);
+					}
+						
+					
+					
+				}
 				else if (line.startsWith("DUPLICATE")) {
 					JOptionPane.showMessageDialog(frame, "This user is already signed in.",
 							"Warning", JOptionPane.WARNING_MESSAGE);
@@ -243,7 +261,7 @@ public class Client {
 							"Warning", JOptionPane.WARNING_MESSAGE);
 				}
 				else if (line.startsWith("NAMENOTFOUND")) {
-					JOptionPane.showMessageDialog(frame, "    Username not found.",
+					JOptionPane.showMessageDialog(frame, "     Username not found.",
 							"Warning", JOptionPane.WARNING_MESSAGE);
 				}
 				else if (line.startsWith("INCOMPLETE")) {
@@ -275,11 +293,27 @@ public class Client {
 		public JPanel tab;
 		public JTextArea textArea;
 		public JScrollPane scrollPane;
+		//public JButton jButton;
 		public String name;
 		public HashSet<String> names;
 	
-		public Chatroom(){
+		public Chatroom() {
 				
+		}
+		
+		public void	createRoom(String name) {
+			this.name = name;
+			tab = new JPanel();
+			textArea = new JTextArea(10, 40);
+			scrollPane = new JScrollPane(textArea);
+			//room.jButton = new JButton("Invite User");
+			tab.add(scrollPane, BorderLayout.CENTER);
+			textArea.setEditable(false);
+			textArea.setLineWrap(true);
+			textArea.setWrapStyleWord(true);
+			DefaultCaret caret = (DefaultCaret)textArea.getCaret();
+			caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+			scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		}
 		
 		private static void searchTab(JPanel tab) {
