@@ -28,6 +28,7 @@ public class Server {
 	 */
 	public static void main(String[] args) {
 		gui = new ServerGUI();
+		User.createDir();
 		gui.start();
 		try {
 			listener = new ServerSocket(PORT);
@@ -156,6 +157,7 @@ public class Server {
 							String input = "";
 							try { 
 								input = nameInput.split("%")[1];
+								User.writeUserLog(name, input);
 							}
 							catch (ArrayIndexOutOfBoundsException e) {}
 							for (PrintWriter writer: writers) {
@@ -181,7 +183,8 @@ public class Server {
 						
 						else {
 							char tab = tabInput.charAt(0);
-							String input = tabInput.substring(1); 
+							String input = tabInput.substring(1);
+							User.writeUserLog(name, input);
 							for (PrintWriter writer: writers) {
 								writer.println("MESSAGE" + tab + name + ": " + input);
 							}

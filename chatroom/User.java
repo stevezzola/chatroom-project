@@ -3,10 +3,13 @@ package chatroom;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 /**
  * User Class for managing user info
@@ -113,6 +116,50 @@ public class User implements Serializable {
 			}
 		}
 		return -1;
+	}
+	
+	/*
+	 *  writes log of user messages
+	 */
+	public static void writeUserLog(String name, String message) {
+		String fileName = "user_logs\\" + name.toLowerCase() + ".dat";
+		try {
+			PrintWriter pw = new PrintWriter(new FileWriter(fileName, true));
+			pw.write(name + ": " + message + "\n");
+			pw.close();
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/*
+	 *  reads log of user messages
+	 */
+	public static ArrayList<String> readUserLog(String name) {
+		String fileName = "user_logs\\" + name.toLowerCase() + ".dat";
+		try {
+			Scanner sc = new Scanner(new File(fileName));
+			ArrayList<String> log = new ArrayList<String>();
+			while (sc.hasNextLine()) {
+				log.add(sc.nextLine());
+			}
+			sc.close();
+			return log;
+		}
+		catch (Exception e) {
+			return null;
+		}
+	}
+	
+	/*
+	 *  if no users exist, creates folder for logs
+	 */
+	public static void createDir() {
+		if (loadUserArrayList() == null) {
+			File dir = new File("user_logs");
+			dir.mkdir();
+		}
 	}
 	
 	public void setName(String name) {

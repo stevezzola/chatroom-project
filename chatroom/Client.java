@@ -41,9 +41,12 @@ public class Client {
 	JTextField textField = new JTextField(40);
 	JTextArea textArea1 = new JTextArea(10, 40);
 	JTextArea textArea2 = new JTextArea(10, 40);
+	JTextArea sideTextArea = new JTextArea(12, 5);
 	JScrollPane scrollPane1 = new JScrollPane(textArea1);
 	JScrollPane scrollPane2 = new JScrollPane(textArea2);
 	JTabbedPane tabbedPane = new JTabbedPane();
+	JPanel panel1 = new JPanel();
+	JPanel panel2 = new JPanel();
 	JPanel tab1 = new JPanel();
 	JPanel tab2 = new JPanel();
 	JPanel tabPlus = new JPanel();
@@ -77,10 +80,18 @@ public class Client {
 		tabbedPane.setEnabledAt(2, false);
 		tabbedPane.setTabComponentAt(2, tabPlusButton);
 		inviteButton.setEnabled(false);
-		frame.getContentPane().setBackground(Color.LIGHT_GRAY);
-		frame.getContentPane().add(tabbedPane);
-		frame.getContentPane().add(inviteButton, BorderLayout.NORTH);
-		frame.getContentPane().add(textField, BorderLayout.SOUTH);
+		panel1.setBackground(Color.LIGHT_GRAY);
+		panel2.setBackground(Color.LIGHT_GRAY);
+		panel1.setLayout(new BorderLayout ());
+		panel2.setLayout(new BorderLayout ());
+		panel1.add(tabbedPane);
+		sideTextArea.setEditable(false);
+		sideTextArea.setBackground(Color.LIGHT_GRAY);
+		panel2.add(inviteButton, BorderLayout.SOUTH);
+		panel2.add(sideTextArea, BorderLayout.NORTH);
+		frame.getContentPane().add(panel2, BorderLayout.EAST);
+		panel1.add(textField, BorderLayout.SOUTH);
+		frame.getContentPane().add(panel1, BorderLayout.WEST);
 		frame.setResizable(false);
 		frame.pack();
 		
