@@ -165,11 +165,17 @@ public class Client {
 				if (inviteName != null) {
 					out.println("INVITE" + Chatroom.selected.name + "%" + inviteName.replace("%", "/"));
 					try {
+						objOut = new ObjectOutputStream(socket.getOutputStream());
 						objOut.writeObject(Chatroom.selected.usernames);
+						objOut.close();
+						objIn = new ObjectInputStream(socket.getInputStream());
 						Chatroom.selected.usernames = (ArrayList)objIn.readObject();
+						objIn.close();
+						System.out.println("HERE!");
 						System.out.println(Chatroom.selected.usernames.toString());
 					} catch (Exception e1) {
 						e1.printStackTrace();
+						System.out.println(Chatroom.selected.usernames.toString());
 					}
 				}
 			}
@@ -257,8 +263,6 @@ public class Client {
 			socket = new Socket(serverAddress, 4000);
 			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			out = new PrintWriter(socket.getOutputStream(), true);
-			objOut = new ObjectOutputStream(socket.getOutputStream());
-			objIn = new ObjectInputStream(socket.getInputStream());
 		}
 		catch (UnknownHostException e) {
 			JOptionPane.showMessageDialog(frame, "Could not match IP address to a host.",
@@ -341,7 +345,6 @@ public class Client {
 				}
 			}
 			catch (Exception e) {
-				e.printStackTrace();
 				JOptionPane.showMessageDialog(frame, "Lost connection to the server!",
 						"Warning", JOptionPane.ERROR_MESSAGE);
 				socket.close();
