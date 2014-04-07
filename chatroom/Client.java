@@ -7,6 +7,8 @@ import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -34,8 +36,11 @@ import javax.swing.text.DefaultCaret;
  *
  */
 public class Client {
+	private String username;
 	private BufferedReader in;
 	private PrintWriter out;
+	private ObjectOutputStream objOut;
+	private ObjectInputStream objIn;
 	private Socket socket = new Socket();
 	JFrame frame = new JFrame("Messenger");
 	JTextField textField = new JTextField(40);
@@ -119,12 +124,14 @@ public class Client {
 			public void stateChanged(ChangeEvent e) {
 				JPanel temp = (JPanel)tabbedPane.getSelectedComponent();
 				Chatroom.searchTab(temp);
-				if (tabbedPane.getSelectedIndex() > 1) {
+				try {
+				if (Chatroom.selected.usernames != null) {
 					inviteButton.setEnabled(true);
 				}
 				else {
 					inviteButton.setEnabled(false);
 				}
+				} catch (Exception e1) {};
 			}
 		});
 		
@@ -138,6 +145,7 @@ public class Client {
 				if (newTabName != null && !newTabName.equals("") && Chatroom.searchTab(newTabName) == null
 						&& !newTabName.equals("Room 1") && !newTabName.equals("Room 2")) {
 					Chatroom room = new Chatroom();
+					room.usernames.add(username);
 					room.createRoom(newTabName);
 					Chatroom.chatrooms.add(room);
 					tabbedPane.setSelectedComponent(tabPlus);
@@ -156,6 +164,13 @@ public class Client {
 						"Add User", JOptionPane.PLAIN_MESSAGE);
 				if (inviteName != null) {
 					out.println("INVITE" + Chatroom.selected.name + "%" + inviteName.replace("%", "/"));
+					try {
+						objOut.writeObject(Chatroom.selected.usernames);
+						Chatroom.selected.usernames = (ArrayList)objIn.readObject();
+						System.out.println(Chatroom.selected.usernames.toString());
+					} catch (Exception e1) {
+						e1.printStackTrace();
+					}
 				}
 			}
 		});
@@ -242,6 +257,8 @@ public class Client {
 			socket = new Socket(serverAddress, 4000);
 			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			out = new PrintWriter(socket.getOutputStream(), true);
+			objOut = new ObjectOutputStream(socket.getOutputStream());
+			objIn = new ObjectInputStream(socket.getInputStream());
 		}
 		catch (UnknownHostException e) {
 			JOptionPane.showMessageDialog(frame, "Could not match IP address to a host.",
@@ -275,6 +292,7 @@ public class Client {
 							"Congratulations!", JOptionPane.INFORMATION_MESSAGE);
 				}
 				else if (line.startsWith("NAMEACCEPTED")) {
+					username = line.substring(12);
 					textField.setEditable(true);
 				}
 				else if (line.startsWith("MESSAGE0")) {
@@ -350,7 +368,7 @@ public class Client {
 		public JTextArea textArea;
 		public JScrollPane scrollPane;
 		public String name;
-		public HashSet<String> names;
+		public ArrayList<String> usernames = new ArrayList<String>();
 	
 		public Chatroom() {
 				

@@ -3,10 +3,13 @@ package chatroom;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -60,6 +63,8 @@ public class Server {
 		private Socket socket;
 		private BufferedReader in;
 		private PrintWriter out;
+		private ObjectOutputStream objOut;
+		private ObjectInputStream objIn;
 		
 		public Handler(Socket socket) {
 			this.socket = socket;
@@ -72,6 +77,8 @@ public class Server {
 			try {
 				in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 				out = new PrintWriter(socket.getOutputStream(), true);
+				objOut = new ObjectOutputStream(socket.getOutputStream());
+				objIn = new ObjectInputStream(socket.getInputStream());
 				while(true) {
 					/*
 					 * giving commands to the Client
@@ -141,7 +148,7 @@ public class Server {
 					}
 				}
 				
-				out.println("NAMEACCEPTED");
+				out.println("NAMEACCEPTED" + name);
 				writers.add(out);
 				hashMap.put(name, out);
 			
@@ -166,6 +173,7 @@ public class Server {
 						}
 						else if (tabInput.startsWith("INVITE")) {
 							String nameInput = tabInput.substring(6);
+							ArrayList<String> usernames = (ArrayList<String>)objIn.readObject();
 							String roomName = nameInput.split("%")[0];
 							String inviteName = "";
 							try { 
@@ -173,10 +181,13 @@ public class Server {
 							}
 							catch (ArrayIndexOutOfBoundsException e) {}
 							if (hashMap.get(inviteName) == null) {
+								objOut.writeObject(usernames);
 								out.println("NAMENOTFOUND");
 							}
 							else {
+								usernames.add(inviteName);
 								hashMap.get(inviteName).println("PINVITE" + roomName + "%" + name);
+								objOut.writeObject(usernames);
 								gui.textArea.append(inviteName + " has joined " + name + "'s room: " + roomName + "\n");
 							}
 						}
