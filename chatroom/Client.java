@@ -13,7 +13,6 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.HashSet;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -125,7 +124,7 @@ public class Client {
 				JPanel temp = (JPanel)tabbedPane.getSelectedComponent();
 				Chatroom.searchTab(temp);
 				try {
-				if (Chatroom.selected.usernames != null) {
+				if (Chatroom.selected.usernames != null && tabbedPane.getSelectedIndex() > 1) {
 					inviteButton.setEnabled(true);
 				}
 				else {
@@ -159,23 +158,19 @@ public class Client {
 		 *  Action when user clicks invite button
 		 */
 		inviteButton.addActionListener(new ActionListener() {
+			@SuppressWarnings("unchecked")
 			public void actionPerformed(ActionEvent e) {
 				String inviteName = JOptionPane.showInputDialog(frame, "                   Enter name to invite:", 
 						"Add User", JOptionPane.PLAIN_MESSAGE);
 				if (inviteName != null) {
 					out.println("INVITE" + Chatroom.selected.name + "%" + inviteName.replace("%", "/"));
 					try {
-						objOut = new ObjectOutputStream(socket.getOutputStream());
 						objOut.writeObject(Chatroom.selected.usernames);
-						objOut.close();
-						objIn = new ObjectInputStream(socket.getInputStream());
-						Chatroom.selected.usernames = (ArrayList)objIn.readObject();
-						objIn.close();
-						System.out.println("HERE!");
-						System.out.println(Chatroom.selected.usernames.toString());
+						objOut.flush();
+						Chatroom.selected.usernames = (ArrayList<String>)objIn.readObject();
+						System.out.println("DONE!");
 					} catch (Exception e1) {
 						e1.printStackTrace();
-						System.out.println(Chatroom.selected.usernames.toString());
 					}
 				}
 			}
@@ -263,6 +258,8 @@ public class Client {
 			socket = new Socket(serverAddress, 4000);
 			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			out = new PrintWriter(socket.getOutputStream(), true);
+			objOut = new ObjectOutputStream(socket.getOutputStream());
+			objIn = new ObjectInputStream(socket.getInputStream());
 		}
 		catch (UnknownHostException e) {
 			JOptionPane.showMessageDialog(frame, "Could not match IP address to a host.",

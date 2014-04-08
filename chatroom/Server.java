@@ -77,6 +77,8 @@ public class Server {
 			try {
 				in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 				out = new PrintWriter(socket.getOutputStream(), true);
+				objOut = new ObjectOutputStream(socket.getOutputStream());
+				objIn = new ObjectInputStream(socket.getInputStream());
 				while(true) {
 					/*
 					 * giving commands to the Client
@@ -171,9 +173,9 @@ public class Server {
 						}
 						else if (tabInput.startsWith("INVITE")) {
 							String nameInput = tabInput.substring(6);
-							objIn = new ObjectInputStream(socket.getInputStream());
+							@SuppressWarnings("unchecked")
 							ArrayList<String> usernames = (ArrayList<String>)objIn.readObject();
-							objIn.close();
+							gui.textArea.append(usernames.toString() + "\n");
 							String roomName = nameInput.split("%")[0];
 							String inviteName = "";
 							try { 
@@ -181,24 +183,23 @@ public class Server {
 							}
 							catch (ArrayIndexOutOfBoundsException e) {}
 							if (hashMap.get(inviteName) == null) {
-								objOut = new ObjectOutputStream(socket.getOutputStream());
 								objOut.writeObject(usernames);
-								gui.textArea.append("1");
-								objOut.close();
-								gui.textArea.append("2");
+								objOut.flush();
 								out.println("NAMENOTFOUND");
-								gui.textArea.append("3");
-								
 							}
 							else if (usernames.contains(name)){
 								objOut.writeObject(usernames);
+								objOut.flush();
 							}
 							else {
 								usernames.add(inviteName);
 								objOut.writeObject(usernames);
+								objOut.flush();
 								hashMap.get(inviteName).println("PINVITE" + roomName + "%" + name);
 								gui.textArea.append(inviteName + " has joined " + name + "'s room: " + roomName + "\n");
 							}
+							objOut.close();
+							objIn.close();
 						}
 						
 						else {
